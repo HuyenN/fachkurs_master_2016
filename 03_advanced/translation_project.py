@@ -72,7 +72,7 @@ class Polymer(BioMolecule):
     @sequence.setter
     def sequence(self,string):
         if not isinstance(string, str):
-            raise TypeError('name must be string')
+            raise TypeError('sequence must be string')
         self._sequence=string
     
     
@@ -133,11 +133,9 @@ class Protein(Polymer):
         self.__class__.number_of_proteins += 1 #  increase instance counter
         self.calculate_mass()
 
-    def __add__(self,newsequence):
-        protein=Protein(id,name,sequence)
-        protein+=newsequence
-
-
+    def __add__(self,addedsequence):
+        self.sequence+=addedsequence
+        return self.sequence
     # 9. implement the elongation feature described in the docstring. (__add__)
     
 
@@ -195,11 +193,11 @@ class Ribosome(BioMolecule):
                                                     # mrna still free
                                                     # at pos 0
             self.bound_mrna = mrna
-            self.nascent_prot = None  # 10. Instantiate a new Protein
+            self.nascent_prot = Protein(self.id, self.name,"")  # 10. Instantiate a new Protein 
             self.position = 0
-            self.bound_mrna.binding  # 11. Mark position 0 of MRNA to be bound by ribosome
+            self.bound_mrna.binding[0]=1  # 11. Mark position 0 of MRNA to be bound by ribosome
             
-    def elongate(self):
+    def elongate(self, code):
         """Elongate the new protein by the correct amino acid. Check if an
         MRNA is bound and if ribosome can move to next codon.
         Terminate if the ribosome reaches a STOP codon.
@@ -210,12 +208,25 @@ class Ribosome(BioMolecule):
             return False
 
         # 12. Implement the described features.
+        j=self.position # =0
+        for i in range(0,len(self.bound_mrna.binding)):
+            if self.bound_mrna.binding[i] and not self.bound_mrna.binding[i+1]:
+                codon=self.bound_mrna[j:j+3]
+                while code[codon]!='*':
+                    #self.nascent_prot+=code[codon]
+                    self.nascent_prot=self.nascent_prot.__add__(code[codon])
+                    self.bound_mrna.binding[i+1]=1
+                    j+=3
+        return self.nascent_prot
+       
 
     def terminate(self):
         """
         Splits the ribosome/MRNA complex and returns a protein.
         """
         # 13. Dissociate the complex.
+        for i in range(0,len(self.bound_mrna.binding)):
+            self.bound_mrna.binding[i]=0
         return self.nascent_prot
         
 
