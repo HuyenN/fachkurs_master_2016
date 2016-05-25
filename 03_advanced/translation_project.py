@@ -193,7 +193,7 @@ class Ribosome(BioMolecule):
                                                     # mrna still free
                                                     # at pos 0
             self.bound_mrna = mrna
-            self.nascent_prot = Protein(self.id, self.name,"")  # 10. Instantiate a new Protein 
+            self.nascent_prot = Protein(mrna.id, mrna.name,"")  # 10. Instantiate a new Protein 
             self.position = 0
             self.bound_mrna.binding[0]=1  # 11. Mark position 0 of MRNA to be bound by ribosome
             
